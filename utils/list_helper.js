@@ -22,19 +22,15 @@ const favoriteBlog = (blogs) => {
   if (blogs.length === 0) {
     return "no blogs";
   } else {
-    const likes = blogs.map((blog) => blog.likes);
-    highestLike = Math.max(...likes);
-
-    blogs.forEach((blog) => {
-      if (blog.likes === highestLike) {
-        favBlog = {
-          title: blog.title,
-          author: blog.author,
-          likes: blog.likes,
-        };
-      }
-    });
-    return favBlog;
+    const favBlog = blogs.reduce(
+      (highest, blog) => (blog.likes > highest.likes ? blog : highest),
+      blogs[0]
+    );
+    return {
+      title: favBlog.title,
+      author: favBlog.author,
+      likes: favBlog.likes,
+    };
   }
 };
 
