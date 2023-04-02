@@ -1,0 +1,12 @@
+POST http://localhost:3003/api/blogs
+Content-Type: application/json
+
+{
+   "title": "Doctors hate him",
+   "author": "ripped guy",
+   "url": "www.swolzers.comzers",
+   "likes": 75
+}
+
+###
+GET http://localhost:3003/api/blogs
