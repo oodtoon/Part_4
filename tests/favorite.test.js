@@ -87,4 +87,11 @@ describe("favorite blog", () => {
     });
   });
 
+  test('author with most blogs', () => {
+    const result = listHelper.mostBlogs(listWithSixBlogs)
+    console.log(mostBlogs(listWithSixBlogs))
+  
+  })
+
 });
+
