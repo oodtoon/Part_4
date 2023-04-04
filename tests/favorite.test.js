@@ -1,7 +1,7 @@
-const listHelper = require("../utils/list_helper");
+const listHelper = require("../utils/list_helper")
 
-describe("favorite blog", () => {
-  const listWithNoBlog = [];
+describe("favorite blog or blogger", () => {
+  const listWithNoBlog = []
 
   const listWithOneBlog = [
     {
@@ -12,7 +12,7 @@ describe("favorite blog", () => {
       likes: 5,
       __v: 0,
     },
-  ];
+  ]
 
   const listWithSixBlogs = [
     {
@@ -63,35 +63,75 @@ describe("favorite blog", () => {
       likes: 2,
       __v: 0,
     },
-  ];
-  test("when list has zero blogs, there should be no favorite blog", () => {
-    const result = listHelper.favoriteBlog(listWithNoBlog);
-    expect(result).toEqual("no blogs");
-  });
+  ]
+  describe("favoriteBlog", () => {
+    test("when list has zero blogs, there should be no favorite blog", () => {
+      const result = listHelper.favoriteBlog(listWithNoBlog)
+      expect(result).toEqual("no blogs")
+    })
 
-  test("when list has only one blog, so it should be the favorite blog", () => {
-    const result = listHelper.favoriteBlog(listWithOneBlog);
-    expect(result).toEqual({
+    test("when list has only one blog, so it should be the favorite blog", () => {
+      const result = listHelper.favoriteBlog(listWithOneBlog)
+      expect(result).toEqual({
         title: "Go To Statement Considered Harmful",
         author: "Edsger W. Dijkstra",
-        likes: 5
-    });
-  });
+        likes: 5,
+      })
+    })
 
-  test("when list has 6 blogs, equals to top liked", () => {
-    const result = listHelper.favoriteBlog(listWithSixBlogs);
-    expect(result).toEqual({
+    test("when list has 6 blogs, equals to top liked", () => {
+      const result = listHelper.favoriteBlog(listWithSixBlogs)
+      expect(result).toEqual({
         title: "Canonical string reduction",
         author: "Edsger W. Dijkstra",
-        likes: 12
-    });
-  });
-
-  test('author with most blogs', () => {
-    const result = listHelper.mostBlogs(listWithSixBlogs)
-    console.log(mostBlogs(listWithSixBlogs))
-  
+        likes: 12,
+      })
+    })
   })
 
-});
+  describe("mostBlogs", () => {
+    test("author with most blogs", () => {
+      const result = listHelper.mostBlogs(listWithSixBlogs)
+      expect(result).toEqual({
+        author: "Robert C. Martin",
+        blogs: 3,
+      })
+    })
 
+    test("author with most blogs when there is only one blog", () => {
+      const result = listHelper.mostBlogs(listWithOneBlog)
+      expect(result).toEqual({
+        author: "Edsger W. Dijkstra",
+        blogs: 1,
+      })
+    })
+
+    test("author with most blogs when there is no blogs", () => {
+      const result = listHelper.mostBlogs(listWithNoBlog)
+      expect(result).toEqual("no blogs")
+    })
+  })
+
+  describe("mostLikes", () => {
+    test("most liked author", () => {
+      const result = listHelper.mostLikes(listWithSixBlogs)
+      expect(result).toEqual({
+        author: "Edsger W. Dijkstra",
+        likes: 17,
+      })
+    })
+
+    test("most liked author no blogs", () => {
+      const result = listHelper.mostLikes(listWithNoBlog)
+      expect(result).toEqual("no blogs")
+    })
+
+    test("most liked author with one blog", () => {
+      const result = listHelper.mostLikes(listWithOneBlog)
+      expect(result).toEqual({
+        author: "Edsger W. Dijkstra",
+        likes: 5,
+      })
+    })
+  })
+})

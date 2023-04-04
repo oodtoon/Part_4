@@ -12,7 +12,8 @@ POST http://localhost:3003/api/users/
 Content-Type: application/json
 
 {
-    "username": "ro",
-    "name": "Superuser",
-    "password": "salainen" 
+    "username": "test",
+    "name": "even more test",
+    "password": "youcantseeme",
+    "id": "642b2134f28bed42d3598f2d"
 }
