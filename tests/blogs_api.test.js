@@ -5,6 +5,7 @@ const app = require("../app")
 const Blog = require("../models/blog")
 const bcrypt = require("bcrypt")
 const User = require("../models/user")
+const jwt = require("jsonwebtoken")
 
 const api = supertest(app)
 
@@ -35,6 +36,17 @@ describe("there are initially blogs", () => {
 })
 
 describe("adding notes to blog", () => {
+  let token = null
+  beforeAll(async () => {
+    await User.deleteMany({})
+
+    const passwordHash = await bcrypt.hash("12345", 10)
+    const user = await new User({ username: "name", passwordHash }).save()
+
+    const testToken = { username: "name", id: user.id }
+    return (token = jwt.sign(testToken, process.env.SECRET))
+  })
+
   test("new blog has been added", async () => {
     const newBlog = {
       title: "Canonical string reduction",
@@ -45,6 +57,7 @@ describe("adding notes to blog", () => {
     }
     await api
       .post("/api/blogs")
+      .set("Authorization", `Bearer ${token}`)
       .send(newBlog)
       .expect(201)
       .expect("Content-Type", /application\/json/)
@@ -66,6 +79,7 @@ describe("adding notes to blog", () => {
     }
     await api
       .post("/api/blogs")
+      .set("Authorization", `Bearer ${token}`)
       .send(zeroLikesBlog)
       .expect(201)
       .expect("Content-Type", /application\/json/)
@@ -84,7 +98,11 @@ describe("adding notes to blog", () => {
       likes: 12,
       id: "5a422b3a1b54a676234d17f9",
     }
-    await api.post("/api/blogs").send(missingTitleBlog).expect(400)
+    await api
+    .post("/api/blogs")
+    .set("Authorization", `Bearer ${token}`)
+    .send(missingTitleBlog)
+    .expect(400)
 
     const blogsAtEnd = await helper.blogsInDb()
 
@@ -99,24 +117,80 @@ describe("adding notes to blog", () => {
       id: "5a422b3a1b54a676234d17f9",
     }
 
-    await api.post("/api/blogs").send(missingUrlBlog).expect(400)
+    await api
+    .post("/api/blogs")
+    .set("Authorization", `Bearer ${token}`)
+    .send(missingUrlBlog)
+    .expect(400)
 
     const blogsAtEnd = await helper.blogsInDb()
 
     expect(blogsAtEnd).toHaveLength(helper.initialBlogs.length)
   })
+
+  test("Status code 401 if token is not provided", async () => {
+
+    const newBlog = {
+      title: "Canonical string reduction",
+      author: "Edsger W. Dijkstra",
+      url: "http://www.cs.utexas.edu/~EWD/transcriptions/EWD08xx/EWD808.html",
+      likes: 12,
+      id: "5a422b3a1b54a676234d17f9",
+    }
+
+    token = 'badtoken'
+
+    await api
+      .post("/api/blogs")
+      .set("Authorization", `Bearer ${token}`)
+      .send(newBlog)
+      .expect(401)
+
+    const blogsAtEnd = await helper.blogsInDb()
+    expect(blogsAtEnd).toHaveLength(helper.initialBlogs.length)
+  })
 })
 
 describe("a blog is deleted", () => {
+  let token = null
+  beforeEach(async () => {
+    await Blog.deleteMany({})
+    await User.deleteMany({})
+
+    const passwordHash = await bcrypt.hash("12345", 10)
+    const user = await new User({ username: "name", passwordHash }).save()
+
+    const testToken = { username: "name", id: user.id }
+    token = jwt.sign(testToken, process.env.SECRET)
+
+    const newBlog = {
+      title: "Canonical string reduction",
+      author: "Edsger W. Dijkstra",
+      url: "http://www.cs.utexas.edu/~EWD/transcriptions/EWD08xx/EWD808.html",
+      likes: 12,
+      id: "5a422b3a1b54a676234d17f9",
+    }
+    await api
+      .post("/api/blogs")
+      .set("Authorization", `Bearer ${token}`)
+      .send(newBlog)
+      .expect(201)
+      .expect("Content-Type", /application\/json/)
+
+    return token
+  })
   test("succeeds with status code 204 when blog with valid id is deleted", async () => {
     const blogsAtStart = await helper.blogsInDb()
     const blogToDelete = blogsAtStart[0]
 
-    await api.delete(`/api/blogs/${blogToDelete.id}`).expect(204)
+    await api
+      .delete(`/api/blogs/${blogToDelete.id}`)
+      .set("Authorization", `Bearer ${token}`)
+      .expect(204)
 
     const blogsAtEnd = await helper.blogsInDb()
 
-    expect(blogsAtEnd).toHaveLength(helper.initialBlogs.length - 1)
+    expect(blogsAtEnd).toHaveLength(blogsAtStart.length - 1)
 
     const titles = blogsAtEnd.map((t) => t.title)
     expect(titles).not.toContain(blogToDelete.title)

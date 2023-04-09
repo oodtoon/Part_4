@@ -10,29 +10,35 @@ blogsRouter.get("/", async (request, response) => {
 
 blogsRouter.post("/", async (request, response) => {
   const body = request.body
-  const decodedToken = jwt.verify(request.token, process.env.SECRET)
-  if (!decodedToken.id) {
-    return response.status(401).json({ error: "token invalid" })
-  }
   const user = request.user
 
-  const blog = new Blog({
-    title: body.title,
-    author: body.author,
-    url: body.url,
-    likes: body.likes || "0",
-    user: user.id,
-  })
+  const decodedToken = jwt.verify(request.token, process.env.SECRET)
 
-  if (blog.title && blog.url) {
-    const savedBlog = await blog.save()
-    user.blogs = user.blogs.concat(savedBlog._id)
-    await user.save()
-
-    response.status(201).json(savedBlog)
+  if (!decodedToken.id || decodedToken === "jwt malformed" ) {
+    return response.status(401).json({ error: "token invalid" })
   } else {
-    response.status(400).end()
+
+    const blog = new Blog({
+      title: body.title,
+      author: body.author,
+      url: body.url,
+      likes: body.likes || "0",
+      user: user.id,
+    })
+  
+    if (blog.title && blog.url) {
+      const savedBlog = await blog.save()
+      user.blogs = user.blogs.concat(savedBlog._id)
+      await user.save()
+      response.status(201).json(savedBlog)
+      console.log("what is this", decodedToken)
+  
+    } else { 
+      response.status(400).end()
+    }
   }
+  
+
 })
 
 blogsRouter.delete("/:id", async (request, response) => {

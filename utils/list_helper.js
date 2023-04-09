@@ -88,26 +88,6 @@ const mostLikes = (blogs) => {
   }
 }
 
-const mostLikes2 = (blogs) => {
-  if (blogs.length === 0) {
-    return "no blogs"
-  } else {
-    const authorLikeCounts = blogs.reduce((agg, blog) => {
-      const currentLikeCount = agg[blog.author] || 0
-      agg[blog.author] = currentLikeCount + blog.likes
-    }, {})
-
-    const authorCountPairs = Object.entries(authorLikeCounts)
-    const first = authorCountPairs[0]
-
-    return authorCountPairs.reduce(
-      (highest, [author, likes]) =>
-        likes > highest ? { author, likes } : highest,
-      { author: first[0], likes: first[1] }
-    )
-  }
-}
-
 module.exports = {
   dummy,
   totalLikes,
